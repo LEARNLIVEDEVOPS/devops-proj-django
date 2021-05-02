@@ -1,14 +1,11 @@
 pipeline {
+    agent any
 
-  agent any
-
-  stages {
-    
-    //Github Checkout
-    
-    stage ('test rama') {
-     echo "rama" 
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+            }
+        }
     }
-
-  }
 }
