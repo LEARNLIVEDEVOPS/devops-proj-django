@@ -1,8 +1,3 @@
-library identifier: 'jenkins-shared@master', retriever: modernSCM(
- [$class: 'GitSCMSource',
-  remote: 'https://github.com/MobodidTech/jenkins-shared.git',
- ])
-
 pipeline {
  environment {
   appName = "server"
@@ -10,23 +5,18 @@ pipeline {
   registryCredential = "DjangoServerRegistry"
   projectPath = "/jenkins/data/workspace/django-server"
  }
-
  agent any
-
  parameters {
   gitParameter name: 'RELEASE_TAG',
    type: 'PT_TAG',
    defaultValue: 'master'
  }
-
  stages {
-
   stage('Basic Information') {
    steps {
     sh "echo tag: ${params.RELEASE_TAG}"
    }
   }
-
   stage('Build Image') {
    steps {
     script {
