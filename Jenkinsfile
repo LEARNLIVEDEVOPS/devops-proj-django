@@ -1,10 +1,10 @@
 pipeline {
- environment {
-  appName = "server"
-  registry = "torkashavnd/django-server"
-  registryCredential = "DjangoServerRegistry"
-  projectPath = "/jenkins/data/workspace/django-server"
- }
+ //environment {
+  //appName = "server"
+  //registry = "torkashavnd/django-server"
+  //registryCredential = "DjangoServerRegistry"
+  //projectPath = "/jenkins/data/workspace/django-server"
+ //}
  agent any
  parameters {
   gitParameter name: 'RELEASE_TAG',
@@ -21,9 +21,9 @@ pipeline {
    steps {
     script {
      if (isMaster()) {
-      dockerImage = docker.build "$registry:latest"
+      dockerImage = docker.build rama
      } else {
-      dockerImage = docker.build "$registry:${params.RELEASE_TAG}"
+      dockerImage = docker.build rama
      }
     }
    }
@@ -69,17 +69,15 @@ pipeline {
     }
    }
   }
-
-  stage('Deploy Image') {
-   steps {
-    script {
-      docker.withRegistry("$registryURL", registryCredential) {
-      dockerImage.push()
-      }
-    }
-   }
-  }
-
+  //stage('Deploy Image') {
+   //steps {
+    //script {
+      //docker.withRegistry("$registryURL", registryCredential) {
+      //dockerImage.push()
+      //}
+    //}
+   //}
+  //}
   stage('Notify Telegram') {
    steps() {
     script {
@@ -88,14 +86,12 @@ pipeline {
     }
    }
   }
-
   stage('Garbage Collection') {
    steps {
     sh "docker rmi $registry:${params.RELEASE_TAG}"
    }
   }
  }
-
  post {
   failure {
    script {
@@ -106,11 +102,9 @@ pipeline {
  }
 
 }
-
 def getBuildName() {
  "${BUILD_NUMBER}_$appName:${params.RELEASE_TAG}"
 }
-
 def isMaster() {
  "${params.RELEASE_TAG}" == "master"
 }
