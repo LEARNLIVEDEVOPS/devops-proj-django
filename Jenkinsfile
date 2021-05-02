@@ -1,110 +1,58 @@
 pipeline {
- //environment {
-  //appName = "server"
-  //registry = "torkashavnd/django-server"
-  //registryCredential = "DjangoServerRegistry"
-  //projectPath = "/jenkins/data/workspace/django-server"
- //}
- agent any
- parameters {
-  //gitParameter name: 'RELEASE_TAG',
-   //type: 'PT_TAG',
-   defaultValue: 'master'
- }
- stages {
-  stage('Basic Information') {
-   steps {
-    sh "echo tag: ${params.RELEASE_TAG}"
-   }
-  }
-  stage('Build Image') {
-   steps {
-    script {
-     if (isMaster()) {
-      dockerImage = docker.build rama
-     } else {
-      dockerImage = docker.build rama
-     }
-    }
-   }
-  }
-  //stage('Check Lint') {
-   //steps {
-    //sh "docker run --rm $registry:${params.RELEASE_TAG} flake8"
-  // }
-  //}
 
-  /*stage('Run Tests') {
-   steps {
-    sh "docker run -v $projectPath/reports:/app/reports  --rm --network='host' --env-file=.test.env $registry:${params.RELEASE_TAG} coverage run -m pytest --verbose --junit-xml reports/results.xml"
-   }
-   post {
-    always {
-     // Archive unit tests for the future
-     junit allowEmptyResults: true, testResults: 'reports/results.xml'
-    }
-   }
-  }
+  agent any
 
-  stage('Calculate Coverage') {
-   steps {
-    echo "Code Coverage"
-    sh "docker run -v $projectPath/reports:/app/reports --rm --network='host' --env-file=.test.env $registry:${params.RELEASE_TAG} coverage xml -o reports/coverage.xml"
-   }
-   post {
-    always {
-     step([$class: 'CoberturaPublisher',
-      autoUpdateHealth: false,
-      autoUpdateStability: false,
-      coberturaReportFile: 'reports/coverage.xml',
-      failUnhealthy: false,
-      failUnstable: false,
-      maxNumberOfBuilds: 0,
-      onlyStable: false,
-      sourceEncoding: 'ASCII',
-      zoomCoverageChart: false
-     ])
+  stages {
+    
+    //Github Checkout
+    
+     stage ('Clone Repo') {
+            steps {
+                /* Clone git Repository */
+                checkout scm
+                   }
+                              }
 
+    //Docker Image Building
+    
+     stage('Building image') {
+        steps{
+          script {
+              //sh "docker build -t ramktcs/phpapp-3 ."
+        app = docker.build("ramkitcs/phpapp-4")
+          }
+      }
     }
-   }
-  }
-  //stage('Deploy Image') {
-   //steps {
-    //script {
-      //docker.withRegistry("$registryURL", registryCredential) {
-      //dockerImage.push()
-      //}
-    //}
-   //}
-  //}
-  stage('Notify Telegram') {
-   steps() {
-    script {
-      telegram.sendTelegram("Build successful for ${getBuildName()}\n" +
-      "image $registry:${params.RELEASE_TAG} is pushed to DockerHub and ready to be deployed")
-    }
-   }
-  }
-  stage('Garbage Collection') {
-   steps {
-    sh "docker rmi $registry:${params.RELEASE_TAG}"
-   }
-  }
- }
- post {
-  failure {
-   script {
-    telegram.sendTelegram("Build failed for ${getBuildName()}\n" +
-     "Checkout Jenkins console for more information. If you are not a developer simply ignore this message.")
-   }
-  }
- }
 
+    //Docker Image push to Dockerhub
+    
+   stage ('Push Image') {
+     steps  {
+          echo "Push Image on DockerHub"
+          script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub')
+                     //sh "docker push ramkitcs/phpapp-3"
+            
+            {            
+       app.push("${env.BUILD_NUMBER}")            
+       app.push("latest")        
+              }    
+            
 }
-def getBuildName() {
- "${BUILD_NUMBER}_$appName:${params.RELEASE_TAG}"
 }
-def isMaster() {
- "${params.RELEASE_TAG}" == "master"
 }
-*/
+    
+      //Docker Image deployment
+    
+    stage ('Deploy') {
+     steps {
+         echo "Run containers"
+         script {
+          sh "docker run -d -p 8081:80 ramkitcs/phpapp-4"
+                     }
+                  }
+  }          
+    
+
+  }
+}
