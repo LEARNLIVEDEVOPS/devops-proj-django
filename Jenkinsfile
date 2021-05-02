@@ -7,8 +7,8 @@ pipeline {
  //}
  agent any
  parameters {
-  gitParameter name: 'RELEASE_TAG',
-   type: 'PT_TAG',
+  //gitParameter name: 'RELEASE_TAG',
+   //type: 'PT_TAG',
    defaultValue: 'master'
  }
  stages {
@@ -28,14 +28,13 @@ pipeline {
     }
    }
   }
+  //stage('Check Lint') {
+   //steps {
+    //sh "docker run --rm $registry:${params.RELEASE_TAG} flake8"
+  // }
+  //}
 
-  stage('Check Lint') {
-   steps {
-    sh "docker run --rm $registry:${params.RELEASE_TAG} flake8"
-   }
-  }
-
-  stage('Run Tests') {
+  /*stage('Run Tests') {
    steps {
     sh "docker run -v $projectPath/reports:/app/reports  --rm --network='host' --env-file=.test.env $registry:${params.RELEASE_TAG} coverage run -m pytest --verbose --junit-xml reports/results.xml"
    }
@@ -108,3 +107,4 @@ def getBuildName() {
 def isMaster() {
  "${params.RELEASE_TAG}" == "master"
 }
+*/
